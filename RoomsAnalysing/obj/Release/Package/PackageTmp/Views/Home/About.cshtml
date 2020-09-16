@@ -1,0 +1,13 @@
+﻿
+
+    <head>
+        <script src="https://api-maps.yandex.ru/2.1/?apikey=469f2f2d-3cfe-4731-af3d-4321e8087b26&lang=ru_RU" type="text/javascript">
+        </script>
+        <script src="~/Scripts/clusterer_create.js"></script >
+    </head>
+
+    <body>
+        <div hidden id="data">@Newtonsoft.Json.JsonConvert.SerializeObject(Model)</div>
+        <div id="map" style="width: 1000px; height: 800px"></div>
+    </body>
+

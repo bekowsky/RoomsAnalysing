@@ -1,0 +1,40 @@
+﻿
+@model RoomsAnalysing.Models.Parameters
+
+
+@{
+    if (Model == null)
+    {
+        <p>На указанный адресс не подключено оповещение</p>
+    }
+    else
+    {
+<button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+    Подключено уведомление квартир со следующими параметрами:
+</button>
+
+<div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+    <div class="card-body">
+       <p> @ViewBag.id;</p>
+        <p>Цена @Model.price1 - @Model.price2</p>
+        <p>Площадь @Model.S1 - @Model.S2</p>
+        <p>Расстояние до центра @Model.centre_distance1 - @Model.centre_distance2</p>
+        <p>Расстояние до метро @Model.metro_distance1 - @Model.metro_distance2</p>
+        <p>Этаж @Model.flat1 - @Model.flat2</p>
+        <p>Этажность дома @Model.max_flat1 - @Model.max_flat2</p>
+    </div>
+</div>
+            
+                
+       
+      
+       
+        
+    }
+
+
+}
+
+
+
+

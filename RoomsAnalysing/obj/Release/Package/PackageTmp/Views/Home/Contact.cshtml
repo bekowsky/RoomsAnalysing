@@ -1,0 +1,204 @@
+﻿
+@{
+    ViewBag.Title = "Уведомления";
+}
+<script src="~/Scripts/Action.js"></script>
+<h2>@ViewBag.Title.</h2>
+
+<h3>Чтобы получать уведомления на Telegram нужно познакомится с ботом &#x40;RoomsAnalyzer_bot, написав ему любое сообщение</h3>
+
+@using (Ajax.BeginForm("MailListPage", new AjaxOptions { UpdateTargetId = "results" }))
+{
+    <input type="hidden" id="actt" name="act" value="search">
+    <div class="row">
+        <div class="col-xs-8">
+
+            <div class="col-xs-12">
+
+                <input class="col-xs-10 form-control" type="text" name="mail" id="mail" placeholder="Почта" value=""  />
+                <input class="col-xs-2 form-control" type="text" placeholder="&#x40;mail.ru" readonly>
+
+            </div>
+
+
+            <div class="col-xs-12">
+                <input class="col-xs-2 form-control" type="text" placeholder="&#x40;" readonly>
+                <input class="col-xs-10 form-control" type="text" name="telegram" id="telegram" placeholder="username" value=""  />
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <button type="submit" onclick="search()" class=" btn-lg btn-primary">Найти</button>
+            <button type="submit" onclick="drop()" class="btn-lg btn-danger">Удалить</button>
+        </div>
+    </div>
+
+    <div id="results"></div>
+    <script>
+        function drop() {
+            document.getElementById("actt").value = "drop";
+        }
+
+        function search() {
+            document.getElementById("actt").value = "search";
+        }
+    </script>
+}
+
+
+<form method="post" action="">
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-10">
+            <div class="col-md-4">
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Стоимость
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:500px; padding-left:50px">
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="price1" class="form-control" id="price1" placeholder="Цена" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="10000000" value="0" id="customRange1" onchange="show(1)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="price2" class="form-control" id="price2" placeholder="Цена" value="100 000 000" required>
+                            <input type="range" class="custom-range" min="0" max="100000000" value="100000000" id="customRange2" onchange="show(2)">
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Площадь
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:400px; padding-left:50px">
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="S1" class="form-control" id="price3" placeholder="Площадь" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange3" value="0" onchange="show(3)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="S2" class="form-control" id="price4" placeholder="Площадь" value="100" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange4" value="100" onchange="show(4)">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Этаж
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:400px; padding-left:50px">
+                            <p>Этаж</p>
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="flat1" class="form-control" id="price9" placeholder="Этаж" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange9" value="0" onchange="show(9)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="flat2" class="form-control" id="price10" placeholder="Этаж" value="100" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange10" value="100" onchange="show(10)">
+                            <p>Этажность дома</p>
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="max_flat1" class="form-control" id="price11" placeholder="Этаж" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange11" value="0" onchange="show(11)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="max_flat2" class="form-control" id="price12" placeholder="Этаж" value="100" required>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange12" value="100" onchange="show(12)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Расстояние до метро
+                        </button>
+
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:400px; padding-left:50px">
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="metro_distance1" class="form-control" id="price5" placeholder="Расстояние" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="2000" id="customRange5" value="0" onchange="show(5)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="metro_distance2" class="form-control" id="price6" placeholder="Расстояние" value="2000" required>
+                            <input type="range" class="custom-range" min="0" max="2000" id="customRange6" value="2000" onchange="show(6)">
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Удаленность от центра
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:400px; padding-left:50px">
+                            <label for="validationTooltip01">От</label>
+                            <input type="text" name="centre_distance1" class="form-control" id="price7" placeholder="Расстояние" value="0" required>
+                            <input type="range" class="custom-range" min="0" max="55000" id="customRange7" value="0" onchange="show(7)">
+                            <label for="validationTooltip01">До</label>
+                            <input type="text" name="centre_distance2" class="form-control" id="price8" placeholder="Расстояние" value="55 000" required>
+                            <input type="range" class="custom-range" min="0" max="55000" id="customRange8" value="55000" onchange="show(8)">
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Кол-во комнат
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width:400px; padding-left:50px">
+                            <div class="col-xs-12">
+                                <input type="checkbox" name="num0" value="true" checked onclick="checkchange(0)" class="form-check-input active" id="checkbox0">
+                                <label class="form-check-label" for="dropdownCheck">
+                                    Студии
+                                </label>
+                            </div>
+                            <div class="col-xs-12">
+                                <input type="checkbox" name="num1" value="true" checked onclick="checkchange(1)" class="form-check-input" id="checkbox1">
+                                <label class="form-check-label" for="dropdownCheck">
+                                    1к квартиры
+                                </label>
+                            </div>
+                            <div class="col-xs-12">
+                                <input type="checkbox" name="num2" value="true" checked onclick="checkchange(2)" class="form-check-input" id="checkbox2">
+                                <label class="form-check-label" for="dropdownCheck">
+                                    2к квартиры
+                                </label>
+                            </div>
+                            <div class="col-xs-12">
+                                <input type="checkbox" name="num3" value="true" checked onclick="checkchange(3)" class="form-check-input" id="checkbox3">
+                                <label class="form-check-label" for="dropdownCheck">
+                                    3к квартиры
+                                </label>
+                            </div>
+                            <div class="col-xs-12">
+                                <input type="checkbox" name="num4" value="true" checked onclick="checkchange(4)" class="form-check-input" id="checkbox4">
+                                <label class="form-check-label" for="dropdownCheck">
+                                    4к+ квартиры
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+        <div class="col-md-2">
+            <button type="submit" onclick="changemail()" class="btn btn-success">Добавить</button>
+        </div>
+    </div>
+    <div class="row">
+
+
+
+
+    </div>
+    <input type="hidden" id="tg" name="telegramname" value="">
+    <input type="hidden" id="mailname" name="mailname" value="">
+
+</form>

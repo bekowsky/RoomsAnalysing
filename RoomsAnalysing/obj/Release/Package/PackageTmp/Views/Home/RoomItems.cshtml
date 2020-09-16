@@ -1,0 +1,62 @@
+﻿@model IEnumerable<RoomsAnalysing.Models.Room>
+
+    <div id="searchresults">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Комнат</th>
+                    <th scope="col">Этаж</th>
+                    <th scope="col">Метро</th>
+                    <th scope="col">До метро</th>
+                  
+                    <th scope="col">Цена</th>
+                    <th scope="col">Дата</th>
+                    <th scope="col">Средняя цена</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1;
+                    foreach (RoomsAnalysing.Models.Room room in Model)
+                    {
+                        <tr>
+                            <th scope="row">@i</th>
+                            @{ string href = "https://www.avito.ru" + room.avito_link;
+                                if (room.num == 0)
+                                {
+                                    <td><a href=@href>Студия</a></td>
+                                }
+                                else
+                                {
+                                    <td><a href=@href>@room.num</a></td>
+                                }
+                            }
+                            <td>@room.flat/@room.max_flat</td>
+                            <td>@room.metro</td>
+                            <td>@room.metro_distance</td>
+                         
+                            <td>@room.room_type Р</td>
+                            <td>@room.date</td>
+                            <td>@room.adress P</td>
+                        </tr>
+                        i++;
+                    }
+
+                }
+            </tbody>
+
+        </table>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item"><button type="submit" class="btn btn-outline-secondary" onclick="downpage()">Предыдущая</button></li>
+                <li class="page-item"><button type="submit" class="btn btn-outline-secondary" id="btnpage1">@ViewBag.page</button></li>
+                <li class="page-item"><button type="submit" class="btn btn-outline-secondary" onclick="uppage()">Следующая</button></li>
+            </ul>
+        </nav>
+    </div>
+<script>
+    let elements = document.querySelectorAll('td');
+
+    for (let elem of elements) {
+        elem.nodeValue =  Number(a).toLocaleString(); 
+</script>
