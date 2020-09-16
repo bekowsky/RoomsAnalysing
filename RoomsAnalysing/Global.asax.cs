@@ -24,7 +24,7 @@ namespace RoomsAnalysing
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             
-            using (StreamReader sr = new StreamReader(@"C:\data\useragents.txt", System.Text.Encoding.Default))
+            using (StreamReader sr = new StreamReader(@"/data\useragents.txt", System.Text.Encoding.Default))
             {
                 int i = 0;
                 string line;
@@ -38,7 +38,7 @@ namespace RoomsAnalysing
 
 
            string output = "";
-            using (StreamReader sr = new StreamReader(@"C:\data\info1.txt", System.Text.Encoding.UTF8))
+            using (StreamReader sr = new StreamReader(@"/data\info1.txt", System.Text.Encoding.UTF8))
             {
                
                 string line;
