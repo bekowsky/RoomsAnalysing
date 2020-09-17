@@ -30,10 +30,12 @@ namespace RoomsAnalysing.Models
 
         public void HeadInfoParse(string data)
         {
-            if (data.Contains("Студия"))
+            data = data.Replace("\n", "");
+            if (data.Contains("Студия")|| data.Contains("студия"))
                 num = 0;
             else
-                num = (int)char.GetNumericValue(data[0]);
+                num = (int)char.GetNumericValue(data[1]);
+      
             int i, j, k = data.IndexOf(',');
             string box = "";
             for (i = k + 2; data[i] != ' '; i++)

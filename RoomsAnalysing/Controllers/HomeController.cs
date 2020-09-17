@@ -1,29 +1,21 @@
-﻿using Accord;
-using Accord.MachineLearning.VectorMachines.Learning;
+﻿
 using Accord.Math;
-using Accord.Math.Optimization;
 using Accord.Math.Optimization.Losses;
 using Accord.Statistics.Kernels;
-using Accord.Statistics.Models.Regression.Fitting;
 using Accord.Statistics.Models.Regression.Linear;
 using HtmlAgilityPack;
-using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
-using Quartz.Impl.Triggers;
-using Quartz.Util;
 using RoomsAnalysing.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using Telegram.Bot;
 
 namespace RoomsAnalysing.Controllers
 {
@@ -33,10 +25,25 @@ namespace RoomsAnalysing.Controllers
        
         public static HtmlNode GetNode(this HtmlNode node, string classname)
         {
-            foreach (var item in node.ChildNodes)
-                if (item.Attributes.Count > 0)
-                    if (item.Attributes["class"].Value == classname)
-                        return item;
+            if (node != null)
+            {
+                foreach (var item in node.ChildNodes)
+                    if ((item.Attributes.Count > 0) && (item.Attributes.Contains("class")))
+                        if (item.Attributes["class"].Value == classname)
+                            return item;
+            }
+            return null;
+        }
+
+        public static HtmlNode GetNode(this HtmlNode node,string atrname, string classname)
+        {
+            if (node != null)
+            {
+                foreach (var item in node.ChildNodes)
+                    if ((item.Attributes.Count > 0) && (item.Attributes.Contains(atrname)))
+                        if (item.Attributes[atrname].Value == classname)
+                            return item;
+            }
             return null;
         }
     }
@@ -88,7 +95,6 @@ namespace RoomsAnalysing.Controllers
                         break;
                     }
                 double[] z = p.Transform(new double[] { k, roomAvito.metro_distance, roomAvito.centre_distance, roomAvito.S, roomAvito.flat, roomAvito.max_flat, roomAvito.num, n });
-                //  roomAvito.prediction = Convert.ToInt64((regression1.Transform(z)));
                 if (roomAvito.prediction < 1000000)
                     roomAvito.prediction = 1000000;
                 if (roomAvito.prediction > 60000000)
@@ -104,9 +110,6 @@ namespace RoomsAnalysing.Controllers
         [HttpPost]
         public ActionResult ParamPage()
         {
-
-
-
             return PartialView();
         }
 
@@ -114,18 +117,7 @@ namespace RoomsAnalysing.Controllers
         [HttpPost]
         public ActionResult MailListPage(string mail,string telegram, string act)
         {
-
-        
-            ViewBag.id = null;
-            try
-            {
-              ViewBag.id =  NotificationList.check();
-            }
-            catch(Exception x)
-            {
-                ViewBag.id = "Пока нету";
-            }
-            if (act == "search")
+           if (act == "search")
             {
                 Parameters parameters;
                 try
@@ -206,6 +198,7 @@ namespace RoomsAnalysing.Controllers
                     rooms.Add(room);
                 }
 
+         
             if (sort == "1")
                 return PartialView(rooms.OrderBy(x => x.price).Skip(skip).Take(count));
             if (sort == "2")
@@ -279,8 +272,7 @@ namespace RoomsAnalysing.Controllers
             request.Headers.Add("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3");
 
 
-            try
-            {
+          
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -301,7 +293,7 @@ namespace RoomsAnalysing.Controllers
                     HtmlDocument html = new HtmlDocument();
                     html.LoadHtml(data);
                     HtmlNode node = html.DocumentNode;
-            
+                
 
                     var Nodes = node.ChildNodes[3].ChildNodes[3].GetNode("js-single-page single-page").GetNode("index-center-2ZEUx index-center_withTitle-3Ne4c index-responsive-3H_cC").GetNode("index-inner-LCNXs index-innerCatalog-mLDlZ").GetNode("index-content-2lnSO").GetNode("index-root-2c0gs").FirstChild.ChildNodes[1].ChildNodes.Where(x => x.Name == "div");
 
@@ -309,78 +301,70 @@ namespace RoomsAnalysing.Controllers
                     {
                         if (item.Attributes[0].Value == "snippet snippet-horizontal  snippet-redesign  item-snippet-with-aside item item_table clearfix js-catalog-item-enum item-with-contact js-item-extended")
                         {
+                                Room roomAvito = new Room();
 
-                            //  var j =      item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[5].ChildNodes[1].ChildNodes[1].ChildNodes[1].ChildNodes.Count;
-                            Room roomAvito = new Room();
+                                roomAvito.room_type = room_type;
 
-                            roomAvito.room_type = room_type;
+                                string id = item.Attributes[4].Value;
+                                roomAvito.id = id;
 
-                            string id = item.Attributes[4].Value;
-                            roomAvito.id = id;
+                                string avito_link = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[1].ChildNodes[0].ChildNodes[0].Attributes[2].Value;
+                                roomAvito.avito_link = avito_link;
 
-                            string avito_link = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[1].ChildNodes[0].ChildNodes[0].Attributes[2].Value;
-                            roomAvito.avito_link = avito_link;
-
-                            string pre_title = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[1].ChildNodes[0].InnerText;
-                            roomAvito.HeadInfoParse(pre_title);
+                                string pre_title = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[1].ChildNodes[0].InnerText;
+                                roomAvito.HeadInfoParse(pre_title);
 
 
-                            string pre_price = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[3].InnerText;
-                            roomAvito.PriceParse(pre_price);
+                                string pre_price = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[3].InnerText;
+                                roomAvito.PriceParse(pre_price);
 
 
 
-                            string metro = "";
-                            var bag = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[7];
-                            try
-                            {
-
-                                metro = bag.ChildNodes[bag.ChildNodes.Count - 2].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[1].InnerText;
-
-                                string pre_distance;
-
-                                pre_distance = bag.ChildNodes[bag.ChildNodes.Count - 2].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[3].InnerText;
-                                roomAvito.DistanseParse(pre_distance);
-                            }
-                            catch (Exception ex)
-                            {
-                                metro = "Не москва";
-                            }
-
-                            string adress = bag.ChildNodes[bag.ChildNodes.Count - 2].ChildNodes[0].ChildNodes[0].ChildNodes[0].InnerText;
-                            roomAvito.AdressParse(adress);
-                            roomAvito.metro = metro;
-                            roomAvito.centre_distance = (int)MetroDistanseCalculating(roomAvito.adress);
-
-
-
-                            string datatime = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[9].GetNode("snippet-date-row").ChildNodes[0].Attributes[3].Value;
-                            if (datatime == "")
-                            {
-                                datatime = item.ChildNodes[3].ChildNodes[3].ChildNodes[1].ChildNodes[9].GetNode("snippet-date-row").ChildNodes[0].InnerText;
-                                datatime = datatime.Substring(2, datatime.Length - 3);
-                            }
-                            roomAvito.date = datatime;
-                           roomAvito.dataParce(datatime);
-
-                            string refs = "";
-                            if (item.ChildNodes.Count > 5)
-                                DopRefs.AddLast(item.ChildNodes[5].ChildNodes[1].Attributes[1].Value);
-
-                            BufferRoom.AddLast(roomAvito);
-
-
-
+                                string metro = "";
+                                
+                               
+                            HtmlNode metro_dist = item.GetNode("item__line").GetNode("item_table-wrapper").GetNode("description item_table-description").GetNode("data-marker", "item-address").GetNode("item-address").GetNode("itemprop", "address").GetNode("item-address-georeferences").GetNode("item-address-georeferences").GetNode("item-address-georeferences-item");
+                        if (metro_dist.GetNode("item-address-georeferences-item__content") == null || metro_dist.GetNode("item-address-georeferences-item__after") == null)
+                        {
+                            metro = "Не Москва";
                         }
+                        else
+                        {
+                            metro = metro_dist.GetNode("item-address-georeferences-item__content").InnerText;
+
+                            string pre_distance;
+
+                            pre_distance = metro_dist.GetNode("item-address-georeferences-item__after").InnerText;
+                            roomAvito.DistanseParse(pre_distance);
+                        }
+                              //  string adress = item.GetNode("item__line").GetNode("item_table-wrapper").GetNode("description item_table-description").GetNode("data-marker", "item-address").GetNode("item-address").GetNode("itemprop", "address").GetNode("item-address__string").InnerText;
+                               // roomAvito.AdressParse(adress);
+                                roomAvito.metro = metro;
+                                roomAvito.centre_distance = (int)MetroDistanseCalculating(roomAvito.adress);
+
+                                string datatime = item.GetNode("item__line").GetNode("item_table-wrapper").GetNode("description item_table-description").GetNode("snippet-date-row").GetNode("snippet-date-info").Attributes["data-tooltip"].Value;
+
+                              
+                                roomAvito.date = datatime;
+                                roomAvito.dataParce(datatime);
+
+                               
+                               
+
+                                BufferRoom.AddLast(roomAvito);
+
+                        if (BufferRoom.Count > 15)
+                        {
+                            var t = 5;
+                        }
+
+                            }
+                            } 
                     }
 
                 }
-            } catch (Exception e)
-            {
-                Errors.AddLast(url);
-              
-            }
-        }
+           
+        
 
         static int Search_refs(string url, string room_type, int i)
         {
@@ -805,7 +789,7 @@ namespace RoomsAnalysing.Controllers
             SmtpClient smtp = new SmtpClient("smtp.mail.ru", 2525);
             smtp.Credentials = new NetworkCredential("roomanalyzing@mail.ru", "Kbhjq1337");
             smtp.EnableSsl = true;
-         
+       
             smtp.Send(m);
             
         }
