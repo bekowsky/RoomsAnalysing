@@ -121,7 +121,7 @@ namespace RoomsAnalysing.Models
         {
             int num = 4;
             string box = "", hour = "", minute = "";
-            int i, j, k;
+            int i, j;
             for (i = 0; data[i] != ' '; i++)
                 box += data[i];
             if (data.Contains("марта"))

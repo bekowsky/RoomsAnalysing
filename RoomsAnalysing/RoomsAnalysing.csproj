@@ -163,6 +163,7 @@
     <Compile Include="Jobs\TelegramListener.cs" />
     <Compile Include="Jobs\TelegramListenerSheduler.cs" />
     <Compile Include="Models\CianModel.cs" />
+    <Compile Include="Models\RoomContext.cs" />
     <Compile Include="Models\MapClass.cs" />
     <Compile Include="Models\MetroInfo.cs" />
     <Compile Include="Models\Notification.cs" />

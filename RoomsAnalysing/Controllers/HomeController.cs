@@ -49,25 +49,53 @@ namespace RoomsAnalysing.Controllers
     }
     public class HomeController : Controller
     {
+        
         public static Random random = new Random();
         public static string[] ua = new string[3563];
         public static LinkedList<string> DopRefs = new LinkedList<string>();
         public static LinkedList<string> Errors = new LinkedList<string>();
-        public static LinkedList<Room> RoomsAvito = new LinkedList<Room>();
         public static LinkedList<Room> BufferRoom = new LinkedList<Room>();
-        public static LinkedList<Room> TestRoom = new LinkedList<Room>();
-        public static LinkedList<Room> Kostil = new LinkedList<Room>();
         public static LinkedList<MapClass> mapClasses = new LinkedList<MapClass>();
-        public static Dictionary<string, Parameters> MailList = new Dictionary<string, Parameters>();
         public static MultipleLinearRegression regression = new MultipleLinearRegression();
         public static MultipleLinearRegression regression1 = new MultipleLinearRegression();
-        public static Dictionary<string, double> MetroPrice = new Dictionary<string, double>();
         public static LinkedList<MetroInfo> MetroInfos = new LinkedList<MetroInfo>();
         public static Dictionary<string, string> LoginId = new Dictionary<string, string>();
         public static NotificationList NotificationList = new NotificationList();
+        public static  BookRepository repo;
+        public HomeController()
+        {
+            repo = new BookRepository();
+            var c = repo.List().OrderBy(x => x.metro).Select(x => x);
+
+            foreach (Room room in c)
+            {
+
+                try
+                {
+
+                  MetroInfos.Single(x => x.metro == room.metro).price += room.price;
+                    MetroInfos.Single(x => x.metro == room.metro).num++;
+                }
+                catch (Exception e)
+                {
+                  MetroInfos.AddLast(new MetroInfo { metro = room.metro, num = 1, price = room.price });
+
+                }
+
+            }
+
+            foreach (MetroInfo Metroinfos in MetroInfos)
+            {
+
+                Metroinfos.price = (int)(Metroinfos.price / Metroinfos.num);
+                Metroinfos.k = Metroinfos.price - 15000000;
+                Metroinfos.k /= 1000000;
+            }
+                ModelTrain();
+        }
         public ActionResult Index()
         {
-                                 
+            
             return View();
         }
 
@@ -78,9 +106,9 @@ namespace RoomsAnalysing.Controllers
 
 
 
-            var m = RoomsAvito.GroupBy(x => x.id).Select(x => x.First());
+            var m = repo.List().GroupBy(x => x.id).Select(x => x.First());
             var c = m.OrderBy(x => x.metro).Select(x => x);
-            var coci = m.OrderBy(x => x.dateTime).Select(x => x);
+           
 
             foreach (Room roomAvito in c)
             {
@@ -173,7 +201,7 @@ namespace RoomsAnalysing.Controllers
             ViewBag.page = page;
             Polynomial p = new Polynomial(2, 1);
             double[] inp;
-            foreach (Room room in RoomsAvito)
+            foreach (Room room in repo.List())
                 if (parameters.IsEqual(room))
                 {
 
@@ -353,10 +381,6 @@ namespace RoomsAnalysing.Controllers
 
                                 BufferRoom.AddLast(roomAvito);
 
-                        if (BufferRoom.Count > 15)
-                        {
-                            var t = 5;
-                        }
 
                             }
                             } 
@@ -620,35 +644,16 @@ namespace RoomsAnalysing.Controllers
         {
             // var m = RoomsAvito.GroupBy(x => x.id).Select(x => x.First());
            // var RoomsAvito = HomeController.RoomsAvito.Take(30000);
-            var m = RoomsAvito;
+            var m = repo.List().Count();
              
-            double[][] testinp = new double[TestRoom.Count()][];
-            double[] testoutp = new double[TestRoom.Count()];
-            double[] testpred = new double[TestRoom.Count()];
-            double[][] inp = new double[m.Count()][];
-            double[] outp = new double[m.Count()];
-            double[] pred = new double[TestRoom.Count()];
+           
+  
+            double[][] inp = new double[repo.List().Count()][];
+            double[] outp = new double[repo.List().Count()];
             int i = 0;
 
-            foreach (Room test in TestRoom)
-            {
-                int n = 1;
-                if (test.room_type == "Вторичка")
-                    n = 0;
-                double k = 0;
-                foreach (MetroInfo info in MetroInfos)
-                    if (info.metro == test.metro)
-                    {
-                        
-                        k = info.k;
-                        break;
-                    }
-                testinp[i] = new double[] {k,test.centre_distance, test.metro_distance,  test.S,   test.num, n };                
-                testoutp[i] = test.price;
-                i++;
-            }
-            i = 0;
-            foreach (Room roomAvito in RoomsAvito)
+          
+            foreach (Room roomAvito in repo.List())
             {
 
                 int n = 1;
@@ -662,7 +667,6 @@ namespace RoomsAnalysing.Controllers
                         break;
                     }
                  inp[i] = new double[] {k, roomAvito.centre_distance, roomAvito.metro_distance, roomAvito.S, roomAvito.num,n };
-               //inp[i] = new double[] { roomAvito.S, roomAvito.centre_distance, roomAvito.flat,k,n,roomAvito.metro_distance,roomAvito.max_flat,roomAvito.num };
                 outp[i] = (int)roomAvito.price;
                 i++;
             }
@@ -679,7 +683,7 @@ namespace RoomsAnalysing.Controllers
             Polynomial p = new Polynomial(2, 1);
 
             double[][] z = p.Transform(inp);
-            double[][] convinp = p.Transform(testinp);
+            
             // Now, create an usual OLS algorithm
             var ols1 = new OrdinaryLeastSquares()
             {
@@ -690,94 +694,16 @@ namespace RoomsAnalysing.Controllers
            regression1 = ols1.Learn(z, outp);
 
             // Check the quality of the regression:
-            double[] prediction = regression1.Transform(convinp);
-
-            double error1 = new SquareLoss(expected: testoutp).Loss(actual: prediction);
-            double vfvfv = new RSquaredLoss(numberOfInputs: 2, expected: testoutp).Loss(prediction);
-            var r2loss1 = new RSquaredLoss(numberOfInputs: 9, expected: testoutp)
-            {
-                Adjust = true,
-                // Weights = weights; // (if you have a weighted problem)
-            };
-
-            double ar21 = r2loss1.Loss(prediction); // should be 1
+            
 
 
-            int j = 0;
-            foreach (Room roomAvito in TestRoom)
-            {
-                int n = 1;
-                if (roomAvito.room_type == "Вторичка")
-                    n = 0;
-                double k = 0;
-                foreach (MetroInfo info in MetroInfos)
-                    if (info.metro == roomAvito.metro)
-                    {
-                        k = info.k;
-                        break;
-                    }
-                pred[j] = regression.Transform(new double[] {k,roomAvito.centre_distance, roomAvito.metro_distance,  roomAvito.S,roomAvito.num,n }); ;
-               // pred[j] = svm.Score(new double[] { k, roomAvito.metro_distance, roomAvito.centre_distance, roomAvito.S, roomAvito.flat, roomAvito.max_flat, roomAvito.num, roomAvito.days_remains, n });
-             
-                j++;
-            }
 
-            double error = new SquareLoss(testoutp).Loss(pred);
-
-            // We can also compute other measures, such as the coefficient of determination r²
-            double r2 = new RSquaredLoss(numberOfInputs: 9, expected: testoutp).Loss(pred); // should be 1
-
-            // We can also compute the adjusted or weighted versions of r² using
-            var r2loss = new RSquaredLoss(numberOfInputs: 9, expected: testoutp)
-            {
-                Adjust = true,
-                // Weights = weights; // (if you have a weighted problem)
-            };
-
-            double ar2 = r2loss.Loss(pred); // should be 1
-
-            // Alternatively, we can also use the less generic, but maybe more user-friendly method directly:
-            double ur2 = regression.CoefficientOfDetermination(inp, outp, adjust: true); // should be 1
-
+            
            
 
         }
 
-        public static void ConvertToMapClass()
-        {
-            int i = 0;
-            foreach (Room room in RoomsAvito)
-            {
-                if (i > 20000)
-                {
-                    string box = "";
-                    MapClass m = new MapClass();
-                    m.price = Convert.ToString(room.price);
-                    box = yandex(room.adress);
-                    if (box != "-1")
-                    {
-                        String[] words = box.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        m.lon = words[0];
-                        m.lat = words[1];
-                        mapClasses.AddLast(m);
-                       
-                    }
-                    
-                }
-                i++;
-                if (i > 44000)
-                        break;
-                
-            }
-
-         string   output = JsonConvert.SerializeObject(mapClasses);
-            using (StreamWriter sr = new StreamWriter(@"C:\data\map2.txt", true, System.Text.Encoding.UTF8))
-            {
-                sr.WriteLine(output);
-
-            }
-
-        }
+   
 
        public static void SendEmail(string mail, string url, double percent)
         {

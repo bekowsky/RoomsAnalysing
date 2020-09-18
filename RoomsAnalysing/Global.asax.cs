@@ -36,50 +36,8 @@ namespace RoomsAnalysing
             }
            
 
-
-           string output = "";
-            using (StreamReader sr = new StreamReader(@"/data\info1.txt", System.Text.Encoding.UTF8))
-            {
-               
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    output += line;
-                }
-
-            }
-           HomeController.RoomsAvito = JsonConvert.DeserializeObject<LinkedList<Room>>(output);
-            var m = HomeController.RoomsAvito.GroupBy(x => x.id).Select(x => x.First());
-            var c = m.OrderBy(x => x.metro).Select(x => x);
-
-            foreach (Room room in c)
-            {
-
-                try
-                {
-
-                    HomeController.MetroInfos.Single(x => x.metro == room.metro).price += room.price;
-                    HomeController.MetroInfos.Single(x => x.metro == room.metro).num++;
-                }
-                catch (Exception e)
-                {
-                    HomeController.MetroInfos.AddLast(new MetroInfo { metro = room.metro, num = 1, price = room.price });
-
-                }
-
-            }
-
-            foreach (MetroInfo Metroinfos in HomeController.MetroInfos)
-            {
-
-                Metroinfos.price = (int)(Metroinfos.price / Metroinfos.num);
-                Metroinfos.k = Metroinfos.price - 15000000;
-                Metroinfos.k /= 1000000;
-            }
-            HomeController.ModelTrain();
-
-            PageSearchingSheduler.Start();
-           TelegramListenerSheduler.Start();
+           PageSearchingSheduler.Start();
+          TelegramListenerSheduler.Start();
             AnnouncementSheduler.Start();
         }
     }
